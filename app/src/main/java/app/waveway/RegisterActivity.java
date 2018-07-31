@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -14,6 +15,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import Model.User;
 
@@ -24,7 +26,7 @@ public class RegisterActivity extends AppCompatActivity {
     private EditText editText_Name;
     private FirebaseAuth mAuth;
     private FirebaseUser mUser;
-    private FirebaseDatabase firebaseDatabase;
+    private FirebaseFirestore firestoreDB;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,18 +35,22 @@ public class RegisterActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
         mUser = mAuth.getCurrentUser();
-        firebaseDatabase = FirebaseDatabase.getInstance();
+        firestoreDB = FirebaseFirestore.getInstance();
 
-
+        if(mUser != null) {
+            Log.e("usuario", mUser.getPhoneNumber());
+        }else
+        {
+            Log.e("error","deu ruim");
+        }
         editText_Name = findViewById(R.id.id_textNome);
 
-        Bundle extra = getIntent().getExtras();
+/*        Bundle extra = getIntent().getExtras();
         if(extra != null) {
             phoneNumber = extra.getString("idPhoneNumber");
-        }
+        }*/
 
         DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference();
-
 
         findViewById(R.id.id_button_salvar).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -68,9 +74,9 @@ public class RegisterActivity extends AppCompatActivity {
 
         User user = new User(phoneNumber, name);
 
-        FirebaseDatabase.getInstance().getReference("User")
-                .child(FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber())
-                .setValue(user).addOnCompleteListener(new OnCompleteListener<Void>() {
+        //firestoreDB
+        firestoreDB.collection("User").document(mUser.getUid()).set(user)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if(task.isSuccessful()){
@@ -79,6 +85,5 @@ public class RegisterActivity extends AppCompatActivity {
             }
         });
     }
-
 
 }

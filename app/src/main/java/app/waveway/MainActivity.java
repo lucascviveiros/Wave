@@ -62,6 +62,8 @@ public class MainActivity extends AppCompatActivity {
         editTextCode = findViewById(R.id.id_textCode);
         editTextPhone = findViewById(R.id.id_textPhone);
 
+//        isUserSignedIn();
+
         findViewById(R.id.id_buttonCheckNumber).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -105,6 +107,7 @@ public class MainActivity extends AppCompatActivity {
         if (mUser == null){
             return false;
         }else{
+            startActivity(new Intent(getApplicationContext(), RegisterActivity.class).putExtra("mUser", mUser));
             return true;
         }
     }
@@ -114,6 +117,7 @@ public class MainActivity extends AppCompatActivity {
         super.onStart();
         if (mAuth.getCurrentUser() != null){
             //usuario ja logado
+            startActivity(new Intent(getApplicationContext(), RegisterActivity.class).putExtra("mUser", mUser));
         }
     }
 
