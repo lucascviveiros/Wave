@@ -1,6 +1,8 @@
 package app.waveway;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -15,6 +17,8 @@ import android.widget.Toast;
 import com.firebase.ui.auth.ErrorCodes;
 import com.firebase.ui.auth.IdpResponse;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseException;
@@ -25,26 +29,35 @@ import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.PhoneAuthCredential;
 import com.google.firebase.auth.PhoneAuthProvider;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import Model.User;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static String uniqueIdentifier = null;
     private EditText editTextPhone, editTextCode;
-    private String phone;
+    private String phoneNumber;
     private FirebaseAuth mAuth;
     private FirebaseUser mUser;
-
+    private FirebaseFirestore firestoreDB;
     private String codeSent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        FirebaseApp.initializeApp(this);
 
         mAuth = FirebaseAuth.getInstance();
+        firestoreDB = FirebaseFirestore.getInstance();
 
         editTextCode = findViewById(R.id.id_textCode);
         editTextPhone = findViewById(R.id.id_textPhone);
@@ -56,21 +69,36 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
         findViewById(R.id.id_buttonSendCode).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 verifySignInCode();
+
             }
         });
+
     }
 
     //***********************************//
+
+    private void createCredentialSignIn(String verificationId, String verifyCode) {
+        PhoneAuthCredential credential = PhoneAuthProvider.
+                getCredential(verificationId, verifyCode);
+        signInWithPhoneAuthCredential(credential);
+    }
+
 
     private void instantiateUser(){
         mAuth = FirebaseAuth.getInstance();
         mUser = mAuth.getCurrentUser();
 
+    }
+
+    private void verifySignInCode(){
+        String code = editTextCode.getText().toString();
+        PhoneAuthCredential credential = PhoneAuthProvider.
+                getCredential(codeSent, code);
+        signInWithPhoneAuthCredential(credential);
     }
 
     private boolean isUserSignedIn(){
@@ -87,19 +115,9 @@ public class MainActivity extends AppCompatActivity {
         if (mAuth.getCurrentUser() != null){
             //usuario ja logado
         }
-
-
-
     }
 
     //***********************************//
-
-
-    private void verifySignInCode(){
-        String code = editTextCode.getText().toString();
-        PhoneAuthCredential credential = PhoneAuthProvider.getCredential(codeSent, code);
-        signInWithPhoneAuthCredential(credential);
-    }
 
     private void signInWithPhoneAuthCredential(PhoneAuthCredential credential) {
 
@@ -110,8 +128,12 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
+                            mUser = task.getResult().getUser();
+                            Log.e("user" , mUser.getPhoneNumber());
                             Toast.makeText(getApplicationContext(),
                                     "Sucesso no Login", Toast.LENGTH_LONG).show();
+                            startActivity(new Intent(getApplicationContext(), RegisterActivity.class).putExtra("mUser", mUser));
+
                         } else {
                             if (task.getException() instanceof FirebaseAuthInvalidCredentialsException) {
                                 Toast.makeText(getApplicationContext(),
@@ -124,30 +146,27 @@ public class MainActivity extends AppCompatActivity {
 
     private void sendVerificationCode(){
 
-        phone = editTextPhone.getText().toString();
+        phoneNumber = editTextPhone.getText().toString();
 
-        if(phone.isEmpty()){
+        if(phoneNumber.isEmpty()){
             editTextPhone.setError("Digite o numero!");
             editTextPhone.requestFocus();
             return;
         }
 
-        if(phone.length() < 10 ){
+        if(phoneNumber.length() < 10 ){
             editTextPhone.setError("Número Invalido");
             editTextPhone.requestFocus();
             return;
         }
 
-
         PhoneAuthProvider.getInstance().verifyPhoneNumber(
-                phone,
+                phoneNumber,
                 60,
                 TimeUnit.SECONDS,
                 this,
                 mCallbacks);
     }
-
-
 
     PhoneAuthProvider.OnVerificationStateChangedCallbacks mCallbacks = new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
 
@@ -156,14 +175,13 @@ public class MainActivity extends AppCompatActivity {
             /*Intent intent = new Intent(getApplicationContext(), RegisterActivity.class);
             intent.putExtra("idPhoneNumber", phone);
             startActivity(intent);*/
-
-            startActivity(new Intent(getApplicationContext(), RegisterActivity.class).putExtra("idPhoneNumber", phone));
+            signInWithPhoneAuthCredential(phoneAuthCredential);
         }
 
         @Override
         public void onVerificationFailed(FirebaseException e) {
-
         }
+
 
         @Override
         public void onCodeSent(String s, PhoneAuthProvider.ForceResendingToken forceResendingToken) {
@@ -172,9 +190,6 @@ public class MainActivity extends AppCompatActivity {
             codeSent = s;
         }
     };
-
-
-
 
 
 
