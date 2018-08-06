@@ -81,7 +81,6 @@ public class RegisterActivity extends AppCompatActivity {
     public void onStart() {
         super.onStart();
         if (!checkPermissions()) {
-//            requestPermissions();
             startLocationPermissionRequest();
         } else {
         }

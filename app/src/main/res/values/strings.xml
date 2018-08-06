@@ -91,4 +91,17 @@
         "when a user tries to pick up one of cards.\n\n"
     </string>
     <string name="action_settings">Settings</string>
+    <string name="title_activity_tab">Tab</string>
+    <string name="section_format">Hello World from section: %1$d</string>
+    <string name="title_activity_main2">Main2Activity</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Android Studio</string>
+    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="title_activity_main3">Main3Activity</string>
+    <string name="title_home">Amigos</string>
+    <string name="title_dashboard">Region</string>
+    <string name="title_notifications">Perfil</string>
+    <string name="title_activity_tabs">tabs</string>
 </resources>

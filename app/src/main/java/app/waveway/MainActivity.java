@@ -104,7 +104,10 @@ public class MainActivity extends AppCompatActivity {
         super.onStart();
         if (mAuth.getCurrentUser() != null){
             //usuario ja logado
-            startActivity(new Intent(getApplicationContext(), RegisterActivity.class).putExtra("mUser", mUser));
+//            startActivity(new Intent(getApplicationContext(), RegisterActivity.class).putExtra("mUser", mUser));
+           // startActivity(new Intent(getApplicationContext(), Main3Activity.class).putExtra("mUser", mUser));
+            startActivity(new Intent(getApplicationContext(), Main3Activity.class).putExtra("mUser", mUser));
+
         }
     }
 
