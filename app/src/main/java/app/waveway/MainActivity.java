@@ -42,13 +42,12 @@ import Model.User;
 
 public class MainActivity extends AppCompatActivity {
 
-   // private static String uniqueIdentifier = null;
     private EditText editTextPhone, editTextCode;
     private String phoneNumber;
     private FirebaseAuth mAuth;
     private FirebaseUser mUser;
-//    private FirebaseFirestore firestoreDB;
     private String codeSent;
+    private SharedPreferences sh;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,7 +56,6 @@ public class MainActivity extends AppCompatActivity {
         FirebaseApp.initializeApp(this);
 
         mAuth = FirebaseAuth.getInstance();
-        //firestoreDB = FirebaseFirestore.getInstance();
 
         editTextCode = findViewById(R.id.id_textCode);
         editTextPhone = findViewById(R.id.id_textPhone);
@@ -85,14 +83,13 @@ public class MainActivity extends AppCompatActivity {
         signInWithPhoneAuthCredential(credential);
     }
 
-
-    private void instantiateUser(){
+    private void instantiateUser() {
         mAuth = FirebaseAuth.getInstance();
         mUser = mAuth.getCurrentUser();
 
     }
 
-    private void verifySignInCode(){
+    private void verifySignInCode() {
         String code = editTextCode.getText().toString();
         PhoneAuthCredential credential = PhoneAuthProvider.
                 getCredential(codeSent, code);
@@ -100,13 +97,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onStart(){
+    protected void onStart() {
         super.onStart();
-        if (mAuth.getCurrentUser() != null){
-            //usuario ja logado
-//            startActivity(new Intent(getApplicationContext(), RegisterActivity.class).putExtra("mUser", mUser));
-           // startActivity(new Intent(getApplicationContext(), Main3Activity.class).putExtra("mUser", mUser));
-            startActivity(new Intent(getApplicationContext(), Main3Activity.class).putExtra("mUser", mUser));
+        SharedPreferences prefs = getSharedPreferences("bancolocal", MODE_PRIVATE);
+
+        if (mAuth.getCurrentUser() != null) {
+
+            if (prefs == null) {
+                startActivity(new Intent(getApplicationContext(), RegisterActivity.class).putExtra("mUser", mUser));
+
+            } else {
+                startActivity(new Intent(getApplicationContext(), NavigationActivity.class).putExtra("mUser", mUser));
+            }
 
         }
     }
@@ -119,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
                             mUser = task.getResult().getUser();
-                            Log.e("user" , mUser.getPhoneNumber());
+                            Log.e("user", mUser.getPhoneNumber());
                             Toast.makeText(getApplicationContext(),
                                     "Sucesso no Login", Toast.LENGTH_LONG).show();
                             startActivity(new Intent(getApplicationContext(), RegisterActivity.class).putExtra("mUser", mUser));
@@ -134,17 +136,17 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
 
-    private void sendVerificationCode(){
+    private void sendVerificationCode() {
 
         phoneNumber = editTextPhone.getText().toString();
 
-        if(phoneNumber.isEmpty()) {
+        if (phoneNumber.isEmpty()) {
             editTextPhone.setError("Digite o numero!");
             editTextPhone.requestFocus();
             return;
         }
 
-        if(phoneNumber.length() < 10 ) {
+        if (phoneNumber.length() < 10) {
             editTextPhone.setError("Número Invalido");
             editTextPhone.requestFocus();
             return;
@@ -166,7 +168,8 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onVerificationFailed(FirebaseException e) { }
+        public void onVerificationFailed(FirebaseException e) {
+        }
 
         @Override
         public void onCodeSent(String s, PhoneAuthProvider.ForceResendingToken forceResendingToken) {
@@ -174,7 +177,6 @@ public class MainActivity extends AppCompatActivity {
             codeSent = s;
         }
     };
-
 
 
 }

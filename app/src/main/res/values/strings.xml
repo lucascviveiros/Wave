@@ -104,4 +104,5 @@
     <string name="title_dashboard">Region</string>
     <string name="title_notifications">Perfil</string>
     <string name="title_activity_tabs">tabs</string>
+    <string name="title_activity_navigation">NavigationActivity</string>
 </resources>

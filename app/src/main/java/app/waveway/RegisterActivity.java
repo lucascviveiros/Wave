@@ -3,6 +3,7 @@ package app.waveway;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
@@ -16,6 +17,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
+
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationListener;
@@ -31,7 +33,9 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.koalap.geofirestore.GeoFire;
 import com.koalap.geofirestore.GeoLocation;
+
 import Model.User;
+
 import android.Manifest;
 
 import java.util.Locale;
@@ -43,12 +47,8 @@ public class RegisterActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private FirebaseUser mUser;
     private FirebaseFirestore firestoreDB;
-    private GeoLocation geoLocation;
-    String m_provider = LocationManager.NETWORK_PROVIDER;
-
     private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 34;
     private static final String TAG = MainActivity.class.getSimpleName();
-    private FusedLocationProviderClient mFusedLocationClient;
 
 
     @Override
@@ -105,6 +105,10 @@ public class RegisterActivity extends AppCompatActivity {
             editText_Name.requestFocus();
             return;
         }
+
+        SharedPreferences.Editor editor = getSharedPreferences("bancolocal", MODE_PRIVATE).edit();
+        editor.putString("name", name.toString());
+        editor.apply();
     }
 
     public void CreateUser(String name) {
@@ -118,53 +122,52 @@ public class RegisterActivity extends AppCompatActivity {
         if (permission == PackageManager.PERMISSION_GRANTED) {
 
             client.requestLocationUpdates(request, new LocationCallback() {
-                        @Override
-                        public void onLocationResult(LocationResult locationResult) {
+                @Override
+                public void onLocationResult(LocationResult locationResult) {
 
-                            CollectionReference ref = FirebaseFirestore.getInstance().collection("local");
-                            GeoFire geoFire = new GeoFire(ref);
+                    CollectionReference ref = FirebaseFirestore.getInstance().collection("local");
+                    GeoFire geoFire = new GeoFire(ref);
 
-                            Location location = locationResult.getLastLocation();
-                            if (location != null) {
+                    Location location = locationResult.getLastLocation();
+                    if (location != null) {
 
-                                Log.e("location", String.valueOf(location));
+                        Log.e("location", String.valueOf(location));
 
-                                GeoLocation geoLocation = new GeoLocation(location.getLatitude(), location.getLongitude());
-                                geoFire.setLocation("firebase-hq", geoLocation,
-                                        new GeoFire.CompletionListener() {
-                                            @Override
-                                            public void onComplete(String key, Exception exception) {
-                                                if (exception != null) {
-                                                    System.err.println("There was an error saving the location to GeoFire: " + exception.toString());
-                                                } else {
-                                                    System.out.println("Location saved on server successfully!");
-                                                }
-                                            }
-                                        });
+                        GeoLocation geoLocation = new GeoLocation(location.getLatitude(), location.getLongitude());
+                        geoFire.setLocation("firebase-hq", geoLocation,
+                                new GeoFire.CompletionListener() {
+                                    @Override
+                                    public void onComplete(String key, Exception exception) {
+                                        if (exception != null) {
+                                            System.err.println("There was an error saving the location to GeoFire: " + exception.toString());
+                                        } else {
+                                            System.out.println("Location saved on server successfully!");
+                                        }
+                                    }
+                                });
 
-                                User user = new User(phoneNumber, name, geoLocation);
+                        User user = new User(phoneNumber, name, geoLocation);
 
-                                firestoreDB.collection("User").document(mUser.getUid()).set(user)
-                                        .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<Void> task) {
-                                                if (task.isSuccessful()) {
-                                                    Toast.makeText(RegisterActivity.this, "SHOW!", Toast.LENGTH_SHORT).show();
-                                                }
-                                            }
-                                        });
+                        firestoreDB.collection("User").document(mUser.getUid()).set(user)
+                                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        if (task.isSuccessful()) {
+                                            Toast.makeText(RegisterActivity.this, "SHOW!", Toast.LENGTH_SHORT).show();
+                                        }
+                                    }
+                                });
 
-                            }
-                        }
-                            }, null);
+
+                      //  firestoreDB.collection("User").document(mUser.getUid()).get("name").getResult();
+
+
+                    }
+                }
+            }, null);
 
         }
+        startActivity(new Intent(getApplicationContext(), NavigationActivity.class).putExtra("mUser", mUser));
 
     }
 }
-
-
-/*        Bundle extra = getIntent().getExtras();
-        if(extra != null) {
-            phoneNumber = extra.getString("idPhoneNumber");
-        }*/
