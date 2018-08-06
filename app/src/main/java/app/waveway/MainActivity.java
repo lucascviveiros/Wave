@@ -42,12 +42,12 @@ import Model.User;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static String uniqueIdentifier = null;
+   // private static String uniqueIdentifier = null;
     private EditText editTextPhone, editTextCode;
     private String phoneNumber;
     private FirebaseAuth mAuth;
     private FirebaseUser mUser;
-    private FirebaseFirestore firestoreDB;
+//    private FirebaseFirestore firestoreDB;
     private String codeSent;
 
     @Override
@@ -57,12 +57,10 @@ public class MainActivity extends AppCompatActivity {
         FirebaseApp.initializeApp(this);
 
         mAuth = FirebaseAuth.getInstance();
-        firestoreDB = FirebaseFirestore.getInstance();
+        //firestoreDB = FirebaseFirestore.getInstance();
 
         editTextCode = findViewById(R.id.id_textCode);
         editTextPhone = findViewById(R.id.id_textPhone);
-
-//        isUserSignedIn();
 
         findViewById(R.id.id_buttonCheckNumber).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -80,8 +78,6 @@ public class MainActivity extends AppCompatActivity {
         });
 
     }
-
-    //***********************************//
 
     private void createCredentialSignIn(String verificationId, String verifyCode) {
         PhoneAuthCredential credential = PhoneAuthProvider.
@@ -103,15 +99,6 @@ public class MainActivity extends AppCompatActivity {
         signInWithPhoneAuthCredential(credential);
     }
 
-    private boolean isUserSignedIn(){
-        if (mUser == null){
-            return false;
-        }else{
-            startActivity(new Intent(getApplicationContext(), RegisterActivity.class).putExtra("mUser", mUser));
-            return true;
-        }
-    }
-
     @Override
     protected void onStart(){
         super.onStart();
@@ -121,12 +108,8 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    //***********************************//
-
     private void signInWithPhoneAuthCredential(PhoneAuthCredential credential) {
-
         instantiateUser();
-
         mAuth.signInWithCredential(credential)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
@@ -152,13 +135,13 @@ public class MainActivity extends AppCompatActivity {
 
         phoneNumber = editTextPhone.getText().toString();
 
-        if(phoneNumber.isEmpty()){
+        if(phoneNumber.isEmpty()) {
             editTextPhone.setError("Digite o numero!");
             editTextPhone.requestFocus();
             return;
         }
 
-        if(phoneNumber.length() < 10 ){
+        if(phoneNumber.length() < 10 ) {
             editTextPhone.setError("Número Invalido");
             editTextPhone.requestFocus();
             return;
@@ -176,21 +159,15 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onVerificationCompleted(PhoneAuthCredential phoneAuthCredential) {
-            /*Intent intent = new Intent(getApplicationContext(), RegisterActivity.class);
-            intent.putExtra("idPhoneNumber", phone);
-            startActivity(intent);*/
             signInWithPhoneAuthCredential(phoneAuthCredential);
         }
 
         @Override
-        public void onVerificationFailed(FirebaseException e) {
-        }
-
+        public void onVerificationFailed(FirebaseException e) { }
 
         @Override
         public void onCodeSent(String s, PhoneAuthProvider.ForceResendingToken forceResendingToken) {
             super.onCodeSent(s, forceResendingToken);
-
             codeSent = s;
         }
     };
