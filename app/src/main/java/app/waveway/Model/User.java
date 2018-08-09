@@ -1,20 +1,26 @@
-package Model;
+package app.waveway.Model;
 
-import com.koalap.geofirestore.GeoFire;
 import com.koalap.geofirestore.GeoLocation;
-
-import java.util.ArrayList;
 
 public class User {
 
     private String login_number;
     private String name;
     private GeoLocation geoLocal;
+    private PostUser post;
 
     public User(String login_number, String name, GeoLocation geoLocal) {
         this.login_number = login_number;
         this.name = name;
         this.geoLocal = geoLocal;
+    }
+
+    public User(PostUser post){
+        this.post = post;
+    }
+
+    public User(){
+
     }
 
     public GeoLocation getGeoLocal() {

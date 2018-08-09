@@ -1,13 +1,9 @@
 package app.waveway;
 
-import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.location.LocationManager;
-import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -20,7 +16,6 @@ import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
-import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
@@ -28,17 +23,14 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.koalap.geofirestore.GeoFire;
 import com.koalap.geofirestore.GeoLocation;
 
-import Model.User;
+import app.waveway.Model.User;
 
 import android.Manifest;
-
-import java.util.Locale;
 
 public class RegisterActivity extends AppCompatActivity {
 
@@ -49,7 +41,6 @@ public class RegisterActivity extends AppCompatActivity {
     private FirebaseFirestore firestoreDB;
     private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 34;
     private static final String TAG = MainActivity.class.getSimpleName();
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -134,7 +125,7 @@ public class RegisterActivity extends AppCompatActivity {
                         Log.e("location", String.valueOf(location));
 
                         GeoLocation geoLocation = new GeoLocation(location.getLatitude(), location.getLongitude());
-                        geoFire.setLocation("firebase-hq", geoLocation,
+                        geoFire.setLocation("shares", geoLocation,
                                 new GeoFire.CompletionListener() {
                                     @Override
                                     public void onComplete(String key, Exception exception) {
@@ -157,9 +148,6 @@ public class RegisterActivity extends AppCompatActivity {
                                         }
                                     }
                                 });
-
-
-                      //  firestoreDB.collection("User").document(mUser.getUid()).get("name").getResult();
 
 
                     }
